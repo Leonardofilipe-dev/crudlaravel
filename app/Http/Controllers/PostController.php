@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Post; // Certifique-se de importar o modelo do Post corretamente
+use App\Models\Post;
+use PhpParser\Node\Stmt\TryCatch;// Certifique-se de importar o modelo do Post corretamente
 
 
     class PostController extends Controller
@@ -30,20 +31,31 @@ use App\Models\Post; // Certifique-se de importar o modelo do Post corretamente
 
     public function read($id)
     {
-        $post = Post::find($id);
+        try{
+            $post = Post::find($id);
 
-        if (!$post) {
-            return response()->json(['message' => 'Post not found'], 404);
+            if (!$post) {
+                return response()->json(['message' => 'Post not found'], 404);
+            }
+
+            return $post;
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Erro ao buscar o post'], 500);
         }
 
-        return $post;
     }
 
     public function all()
     {
-        $posts = Post::all();
+        try {
+            $posts = Post::all();
 
-        return $posts;
+            return $posts;
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Erro ao buscar o post'], 500);
+        }
+
     }
 
     public function update(Request $request, $id)
@@ -70,11 +82,16 @@ use App\Models\Post; // Certifique-se de importar o modelo do Post corretamente
     }
 
     public function delete(Request $request, $id){
-        $post = Post::find($id);
-        if(!$post){
-            return response()->json(['message' => 'Post not found'], 404);
+        try {
+            $post = Post::find($id);
+            if(!$post){
+                return response()->json(['message' => 'Post not found'], 404);
+            }
+            $post->delete();
+            return response()->json(['message' => 'Post deleted successfully'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Erro ao atualizar o post'], 500);
         }
-        $post->delete();
-        return response()->json(['message' => 'Post deleted successfully'], 200);
+
     }
 }
